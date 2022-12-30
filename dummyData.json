@@ -1,0 +1,115 @@
+[
+  {
+    "id": 1,
+    "name": "Nayan Thakor",
+    "reporting_person": 2,
+    "leaves": [
+      {
+        "id": 1,
+        "reason": "Need to attend marriage of sister.",
+        "start-date": "26-12-2022",
+        "end-date": "28-12-2022",
+        "status": 1
+      },
+      {
+        "id": 2,
+        "reason": "Need to attend marriage of sister.",
+        "start-date": "26-12-2022",
+        "end-date": "28-12-2022",
+        "status": 2
+      },
+      {
+        "id": 3,
+        "reason": "Need to attend marriage of sister.",
+        "start-date": "26-12-2022",
+        "end-date": "28-12-2022",
+        "status": 3
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Amisha Patel",
+    "reporting_person": 2,
+    "leaves": [
+      {
+        "id": 1,
+        "reason": "go to family function.",
+        "date": "2023-1-16",
+        "start-date": "16-1-2023",
+        "end-date": "18-1-2023",
+        "status": 1
+      },
+      {
+        "id": 2,
+        "reason": "go to family function.",
+        "start-date": "16-1-2023",
+        "end-date": "18-1-2023",
+        "status": 2
+      },
+      {
+        "id": 3,
+        "reason": "go to family function.",
+        "start-date": "16-1-2023",
+        "end-date": "18-1-2023",
+        "status": 3
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Sarthak Sarvaiya",
+    "reporting_person": 2,
+    "leaves": [
+      {
+        "id": 1,
+        "reason": "Medical Emargency.",
+        "start-date": "2-2-2023",
+        "end-date": "7-2-2023",
+        "status": 1
+      },
+      {
+        "id": 2,
+        "reason": "Medical Emargency.",
+        "start-date": "2-2-2023",
+        "end-date": "7-2-2023",
+        "status": 2
+      },
+      {
+        "id": 3,
+        "reason": "Medical Emargency.",
+        "start-date": "2-2-2023",
+        "end-date": "7-2-2023",
+        "status": 3
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Sonal Rathod",
+    "reporting_person": 2,
+    "leaves": [
+      {
+        "id": 1,
+        "reason": "Going to Family Function.",
+        "start-date": "14-3-2023",
+        "end-date": "17-3-2023",
+        "status": 1
+      },
+      {
+        "id": 2,
+        "reason": "Going to Family Function.",
+        "start-date": "14-3-2023",
+        "end-date": "17-3-2023",
+        "status": 2
+      },
+      {
+        "id": 3,
+        "reason": "Going to Family Function.",
+        "start-date": "14-3-2023",
+        "end-date": "17-3-2023",
+        "status": 3
+      }
+    ]
+  }
+]
