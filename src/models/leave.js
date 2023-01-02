@@ -40,7 +40,8 @@ const getleaveByUserId = async function (id) {
 };
 
 const createleaves = function (request, response) {
-  const { user_id, start_date, end_date, reason, status } = request;
+  const status = 1;
+  const { user_id, start_date, end_date, reason } = request;
   return new Promise(function (resolve, reject) {
     pool
       .query(
@@ -96,6 +97,28 @@ async function Updateleave(data) {
   });
 }
 
+async function UpdateleaveStatus(data) {
+  const { leave_id, user_id, status } = data;
+  return new Promise(function (resolve, reject) {
+    if (!leave_id.id) {
+      console.log("error: id missing");
+      reject("error: id missing");
+    } else {
+      pool
+        .query(
+          "UPDATE leaves SET    status=$2 , leave_id=$3   WHERE user_id= $1",
+          [user_id, status, leave_id.id]
+        )
+        .then(function (result) {
+          resolve(result.rows[0]);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    }
+  });
+}
+
 module.exports = {
   getleaves,
   createleaves,
@@ -103,4 +126,5 @@ module.exports = {
   Updateleave,
   getleaveByLeaveId,
   getleaveByUserId,
+  UpdateleaveStatus,
 };

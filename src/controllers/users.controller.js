@@ -2,34 +2,49 @@ require("dotenv").config();
 
 var User = require("../models/user");
 var Leave = require("../models/leave");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const auth = require("../helpers/auth");
 
 const listUser = async function (req, res) {
+  let tokanData = req.headers["authorization"];
   let count = 0;
   let data = [];
   let leaveData = [];
   let userData = [];
-  User.getUsers()
+  auth
+    .AUTH(tokanData)
     .then(async function (result) {
-      data = result;
-      data.map((test) => {
-        let user = {};
+      if (result) {
+        User.getUsers().then(async function (result) {
+          data = result;
+          data.map((test) => {
+            let user = {};
 
-        Leave.getleaveByUserId(test.user_id).then(function (resss) {
-          leaveData.push(resss);
-          if (resss) {
-            count++;
-          }
-          user["id"] = test.user_id;
-          user["name"] = test.name;
-          user["reporting_person"] = test.reporting_person;
-          user["leaves"] = resss;
-          userData.push(user);
-          if (count === data.length) {
-            return res.status(200).json(userData);
-          }
+            Leave.getleaveByUserId(test.user_id).then(function (resss) {
+              leaveData.push(resss);
+              if (resss) {
+                count++;
+              }
+              user["id"] = test.user_id;
+              user["name"] = test.name;
+              user["reporting_person"] = test.reporting_person;
+              user["leaves"] = resss;
+              userData.push(user);
+              if (count === data.length) {
+                return res.status(200).json(userData);
+              }
+            });
+          });
         });
-      });
+      } else {
+        res.status(400).json({
+          message: err,
+          statusCode: "400",
+        });
+      }
     })
+
     .catch(function (err) {
       return res.status(400).json({
         message: err,
@@ -40,9 +55,20 @@ const listUser = async function (req, res) {
 
 const listUserById = function (req, res) {
   const { id } = req.params;
-  User.getUserId(id)
-    .then(function (result) {
-      return res.status(200).json(result);
+  let tokanData = req.headers["authorization"];
+  auth
+    .AUTH(tokanData)
+    .then(async function (result) {
+      if (result) {
+        User.getUserId(id).then(function (result) {
+          return res.status(200).json(result);
+        });
+      } else {
+        res.status(400).json({
+          message: err,
+          statusCode: "400",
+        });
+      }
     })
     .catch(function (err) {
       return res.status(400).json({
@@ -50,6 +76,79 @@ const listUserById = function (req, res) {
         statusCode: "400",
       });
     });
+};
+
+const login = (request, response) => {
+  const { email, password } = request.body;
+  User.isUserExists(email).then((isExists) => {
+    if (!isExists) {
+      return response.status(401).json({
+        status: "failed",
+        message: "Invalid email or password!",
+        statusCode: "401",
+      });
+    }
+    User.getUser(email).then(
+      (user) => {
+        bcrypt.compare(password, user.password, (error, isValid) => {
+          if (error) {
+            throw error;
+          }
+          if (!isValid) {
+            return response.status(401).json({
+              status: "failed",
+              message: "Invalid email or password??!",
+              accessToken: null,
+              statusCode: "401",
+            });
+          } else {
+            const token = jwt.sign(
+              {
+                id: user.user_id,
+              },
+              process.env.API_SECRET,
+              {
+                expiresIn: 86400,
+              }
+            );
+            const user_id = user.user_id;
+
+            User.getUserSessionByUser_id(user_id).then(function (isExists) {
+              if (!isExists) {
+                User.createUserSession({ token, user_id }).then(function () {
+                  response.status(200).json({
+                    status: "success",
+                    statusCode: "200",
+                    message: "Login Successfully!",
+                    accessToken: token,
+                    email: email,
+                  });
+                });
+              } else {
+                User.updateUserSession({ token, user_id }).then(function () {
+                  response.status(200).json({
+                    status: "success",
+                    statusCode: "200",
+                    message: "Login Successfully!",
+                    accessToken: token,
+                    email: email,
+                  });
+                });
+              }
+            });
+          }
+        });
+      },
+
+      (error) => {
+        response.status(400).json({
+          status: "failed",
+          statusCode: "400",
+          message: "Error while login.",
+        });
+      }
+    );
+  });
 };
 
 const createUser = (req, res, err) => {
@@ -72,32 +171,51 @@ const createUser = (req, res, err) => {
 
 const deleteUser = (request, response, error) => {
   const { id } = request.params;
-
-  User.DeleteUser(id).then(function (result) {
-    return response.status(200).json({
-      status: "success",
-      statusCode: "200",
-      message: "success! user data deleted suucessfully",
-    });
+  let tokanData = req.headers["authorization"];
+  auth.AUTH(tokanData).then(async function (result) {
+    if (result) {
+      User.DeleteUser(id).then(function (result) {
+        return response.status(200).json({
+          status: "success",
+          statusCode: "200",
+          message: "success! user data deleted suucessfully",
+        });
+      });
+    } else {
+      return res.status(400).json({
+        message: err,
+        statusCode: "400",
+      });
+    }
   });
 };
 
 const updateUser = (req, res) => {
-  User.Updateuser({
-    user_id: req.params,
-    role_id: req.body.role_id,
-    name: req.body.name,
-    email_id: req.body.email_id,
-    phone: req.body.phone,
-    id: req.body.id,
-    dob: req.body.dob,
-  })
-    .then(function (result) {
-      return res.status(200).json({
-        status: "success",
-        statusCode: "200",
-        message: "success! user data updated suucessfully",
-      });
+  let tokanData = req.headers["authorization"];
+  auth
+    .AUTH(tokanData)
+    .then(async function (result) {
+      if (result) {
+        User.Updateuser({
+          user_id: req.params,
+          role_id: req.body.role_id,
+          name: req.body.name,
+          email_id: req.body.email_id,
+          phone: req.body.phone,
+          id: req.body.id,
+          dob: req.body.dob,
+        }).then(function (result) {
+          return res.status(200).json({
+            status: "success",
+            statusCode: "200",
+            message: "success! user data updated suucessfully",
+          });
+        });
+      } else {
+        return res.status(400).json({
+          message: err,
+        });
+      }
     })
     .catch(function (err) {
       return res.status(400).json({
@@ -109,6 +227,7 @@ const updateUser = (req, res) => {
 module.exports = {
   listUser,
   listUserById,
+  login,
   createUser,
   deleteUser,
   updateUser,

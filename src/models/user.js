@@ -1,4 +1,5 @@
 const pool = require("../../config");
+const bcrypt = require("bcrypt");
 
 const getUsers = async function () {
   return new Promise(async function (resolve, reject) {
@@ -15,15 +16,32 @@ const getUsers = async function () {
       });
   });
 };
+async function isUserExists(email) {
+  return new Promise((resolve) => {
+    pool.query(
+      "SELECT * FROM users WHERE email_id = $1",
+      [email],
+      (error, results) => {
+        if (error) {
+          throw error;
+        }
+
+        return resolve(results.rowCount > 0);
+      }
+    );
+  });
+}
 
 const createUser = function (request, response) {
-  const { role_id, name, email_id, phone, dob } = request;
+  const { role_id, name, email_id, phone, dob, password } = request;
   return new Promise(function (resolve, reject) {
-    pool
-      .query(
-        "INSERT INTO users ( role_id, name, email_id, phone, dob ) VALUES ($1, $2 ,$3 ,$4 , $5 )",
-        [role_id, name, email_id, phone, dob]
-      )
+    hashPassword(password)
+      .then(function (hash) {
+        return pool.query(
+          "INSERT INTO users ( role_id, name, email_id, phone, dob , password ) VALUES ($1, $2 ,$3 ,$4 , $5 ,$6 )",
+          [role_id, name, email_id, phone, dob, hash]
+        );
+      })
       .then(function (result) {
         resolve(result.rows[0]);
       })
@@ -54,13 +72,81 @@ const DeleteUser = function (request, response) {
 const getUserById = function (id) {
   return new Promise(function (resolve, reject) {
     pool
-      .query("SELECT * FROM users where id = $1", [id])
+      .query("SELECT * FROM users where user_id = $1", [id])
       .then(function (results) {
         resolve(results.rows[0]);
       })
       .catch(function (err) {
         reject(err);
       });
+  });
+};
+
+async function getUser(email, uuid) {
+  return new Promise((resolve) => {
+    pool.query(
+      "SELECT * FROM users WHERE email_id = $1 ",
+      [email],
+      (error, results) => {
+        if (error) {
+          throw error;
+        }
+
+        return resolve(results.rows[0]);
+      }
+    );
+  });
+}
+
+const getUserSessionByUser_id = function (id) {
+  return new Promise(function (resolve, reject) {
+    pool
+      .query("SELECT * FROM user_session where user_id = $1", [id])
+      .then(function (results) {
+        resolve(results.rows[0]);
+      })
+      .catch(function (err) {
+        reject(err);
+      });
+  });
+};
+
+const createUserSession = function (request, response) {
+  const { token, user_id } = request;
+  return new Promise(function (resolve, reject) {
+    pool
+      .query(
+        "INSERT INTO public.user_session( token, user_id  )  VALUES ( $1, $2);",
+        [token, user_id]
+      )
+      .then(function (result) {
+        resolve(result.rows[0]);
+      })
+      .catch(function (err) {
+        reject(err);
+      });
+  });
+};
+
+const updateUserSession = function (data) {
+  const { token, user_id } = data;
+  return new Promise(function (resolve, reject) {
+    if (!user_id) {
+      console.log("error: id missing");
+      reject("error: id missing");
+    } else {
+      pool
+        .query(
+          "UPDATE public.user_session SET  token=$2     WHERE user_id=$1;",
+          [user_id, token]
+        )
+        .then(function (result) {
+          resolve(result.rows[0]);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    }
   });
 };
 
@@ -99,11 +185,75 @@ const getUserId = function (id) {
   });
 };
 
+function hashPassword(password) {
+  return new Promise(function (resolve, reject) {
+    bcrypt.genSalt(10, function (err, salt) {
+      if (err) {
+        reject(err);
+      } else {
+        bcrypt.hash(password, salt, function (err, hash) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(hash);
+          }
+        });
+      }
+    });
+  });
+}
+
 module.exports = {
+  getUser,
   getUsers,
   getUserById,
   createUser,
   Updateuser,
   DeleteUser,
   getUserId,
+  isUserExists,
+  createUserSession,
+  getUserSessionByUser_id,
+  updateUserSession,
 };
+
+// Name : Sarthak Sarvaiya
+// Job Title : Trainee
+// Team Leader Name : Nayan Thakor, Karan Talapali
+// Leave Type : Causal Leave
+// Reason for leaving: I want to inform you that my colleage exam is going to start in the january. So to prepare for the exam, I want to take a break from my job.
+// Work plan during your absence: I confirmed with my TL and i will manage my padding work after rejoining.
+// Leave Date : 4 January To 5 January , 11 January to 12 January , 17 January to 18 January
+
+// Thank you
+// Sarthak Sarvaiya
+
+// Subject : Leave Request on <Date> i.e 5th Sept 2022 Monday
+
+// Name :
+// Job Title:
+// Team Leader Name :
+// Project Manager Name :
+// Leave Type :
+// Reason for leaving:
+// Work plan during your absence:
+// Leave Date : <Date> (i.e. 5th Sept 2022 Monday)
+
+// Thank you
+// <Name of Person>
+
+// Example :
+
+// Subject : Leave Request on 5th Sept 2022 Monday
+
+// Name : John Sinha
+// Job Title : Sr. Web Developer
+// Team Leader Name : Rajesh Prajapati
+// Project Manager Name : Anant Prajapati
+// Leave Type(CL/SL/UL) : Causal Leave
+// Reason for leaving: going to outside with family
+// Work plan during your absence: I confirmed with my PM/TL and they will manage work in my absence.
+// Leave Date : 5th Sept 2022 Monday
+
+// Thank you
+// John Sinha

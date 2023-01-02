@@ -81,10 +81,32 @@ const updateLeave = (req, res) => {
     });
 };
 
+const updateLeaveStatus = (req, res) => {
+  Leave.UpdateleaveStatus({
+    leave_id: req.body.leave_id,
+    user_id: req.body.user_id,
+    status: req.body.status,
+    reporting_person: req.body.reporting_person,
+  })
+    .then(function (result) {
+      return res.status(200).json({
+        status: "success",
+        statusCode: "200",
+        message: "success! user data updated suucessfully",
+      });
+    })
+    .catch(function (err) {
+      return res.status(400).json({
+        message: err,
+      });
+    });
+};
+
 module.exports = {
   listleave,
   createLeave,
   deleteLeave,
   updateLeave,
   listLeaveById,
+  updateLeaveStatus,
 };
