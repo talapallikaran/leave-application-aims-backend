@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 var Leave = require("../models/leave");
+const auth = require("../helpers/auth");
 
 const listleave = function (req, res) {
   Leave.getleaves()
@@ -47,8 +48,7 @@ const createLeave = (req, res, err) => {
 };
 
 const deleteLeave = (request, response, error) => {
-  const { id } = request.params;
-
+  const id = request.body.leave_id;
   Leave.Deleteleave(id).then(function (result) {
     return response.status(200).json({
       status: "success",
@@ -82,18 +82,38 @@ const updateLeave = (req, res) => {
 };
 
 const updateLeaveStatus = (req, res) => {
-  Leave.UpdateleaveStatus({
-    leave_id: req.body.leave_id,
-    user_id: req.body.user_id,
-    status: req.body.status,
-    reporting_person: req.body.reporting_person,
-  })
-    .then(function (result) {
-      return res.status(200).json({
-        status: "success",
-        statusCode: "200",
-        message: "success! user data updated suucessfully",
-      });
+  const { leave_id, user_id, status, reporting_person } = req.body;
+  let tokanData = req.headers["authorization"];
+  auth
+    .AUTH(tokanData)
+    .then(async function (result) {
+      if (result) {
+        if (result.user_id === user_id) {
+          console.log("result", result);
+          Leave.UpdateleaveStatus({
+            leave_id: req.body.leave_id,
+            user_id: req.body.user_id,
+            status: req.body.status,
+            reporting_person: req.body.reporting_person,
+          }).then(function (result) {
+            return res.status(200).json({
+              status: "success",
+              statusCode: "200",
+              message: "success! user data updated suucessfully",
+            });
+          });
+        } else {
+          return res.status(400).json({
+            message: err,
+            statusCode: "400",
+          });
+        }
+      } else {
+        return res.status(400).json({
+          message: err,
+          statusCode: "400",
+        });
+      }
     })
     .catch(function (err) {
       return res.status(400).json({

@@ -39,7 +39,7 @@ router.post(
 );
 
 router.delete(
-  "/leave/:id",
+  "/leave",
   userControllers.deleteLeave,
   (req, res, next) => {
     res.send(req.data);
@@ -61,7 +61,7 @@ router.put(
 );
 
 router.put(
-  "leave/updateLeaveStatus",
+  "/leave/updateLeaveStatus",
   userControllers.updateLeaveStatus,
   (req, res, next) => {
     res.send(req.data);

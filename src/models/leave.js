@@ -98,17 +98,17 @@ async function Updateleave(data) {
 }
 
 async function UpdateleaveStatus(data) {
-  const { leave_id, user_id, status } = data;
+  const { leave_id, status } = data;
   return new Promise(function (resolve, reject) {
-    if (!leave_id.id) {
+    if (!leave_id) {
       console.log("error: id missing");
       reject("error: id missing");
     } else {
       pool
-        .query(
-          "UPDATE leaves SET    status=$2 , leave_id=$3   WHERE user_id= $1",
-          [user_id, status, leave_id.id]
-        )
+        .query("UPDATE leaves SET    status=$2    WHERE leave_id= $1", [
+          leave_id,
+          status,
+        ])
         .then(function (result) {
           resolve(result.rows[0]);
         })
