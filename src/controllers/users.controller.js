@@ -20,26 +20,27 @@ const listUser = async function (req, res) {
           data.map((test) => {
             let user = {};
             Leave.getleaveByUserId(test.user_id).then(function (resss) {
+              const padTo2Digits = (num) => {
+                return num.toString().padStart(2, "0");
+              };
+
+              const formatDate = (date) => {
+                return [
+                  date.getFullYear(),
+                  padTo2Digits(date.getMonth() + 1),
+                  padTo2Digits(date.getDate()),
+                ].join("-");
+              };
+              let count1 = 0;
               let leaveData = [];
-              let leave = {};
               if (resss.length) {
-                let count1 = 0;
                 resss?.map((data) => {
+                  let leave = {};
                   leave["leave_id"] = data?.leave_id;
                   leave["user_id"] = data?.user_id;
-                  var d = new Date(data?.start_date).getTime();
-                  var start_date = [
-                    new Date(d).getDate(),
-                    new Date(d).getMonth() + 1,
-                    new Date(d).getFullYear(),
-                  ].join("-");
+                  var start_date = formatDate(new Date(data?.start_date));
                   leave["start_date"] = start_date;
-                  var d1 = new Date(data?.end_date).getTime();
-                  var end_date = [
-                    new Date(d1).getDate(),
-                    new Date(d1).getMonth() + 1,
-                    new Date(d1).getFullYear(),
-                  ].join("-");
+                  var end_date = formatDate(new Date(data?.end_date));
                   leave["end_date"] = end_date;
                   leave["reason"] = data?.reason;
                   leave["status"] = data?.status;
@@ -57,7 +58,7 @@ const listUser = async function (req, res) {
               user["id"] = test.user_id;
               user["name"] = test.name;
               user["reporting_person"] = test.reporting_person;
-              user["leaves"] = leaveData;
+              user["leaves"] = leaveData.length === 1 ? resss : leaveData;
               userData.push(user);
               if (count === data.length) {
                 return res.status(200).json(userData);
