@@ -56,7 +56,7 @@ const createLeave = (req, res, err) => {
 };
 
 const deleteLeave = (request, response, error) => {
-  const id = request.body.leave_id;
+  const { id } = request.params;
   Leave.Deleteleave(id).then(function (result) {
     return response.status(200).json({
       status: "success",

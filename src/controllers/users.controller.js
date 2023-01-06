@@ -10,7 +10,6 @@ const listUser = async function (req, res) {
   let tokanData = req.headers["authorization"];
   let count = 0;
   let data = [];
-  let leaveData = [];
   let userData = [];
   auth
     .AUTH(tokanData)
@@ -20,32 +19,40 @@ const listUser = async function (req, res) {
           data = result;
           data.map((test) => {
             let user = {};
-
             Leave.getleaveByUserId(test.user_id).then(function (resss) {
+              let leaveData = [];
               let leave = {};
-              resss?.map((data) => {
-                leave["leave_id"] = data?.leave_id;
-                leave["user_id"] = data?.user_id;
-                var d = new Date(data?.start_date).getTime();
-                var start_date = [
-                  new Date(d).getDate(),
-                  new Date(d).getMonth() + 1,
-                  new Date(d).getFullYear(),
-                ].join("-");
-                leave["start_date"] = start_date;
-                var d1 = new Date(data?.end_date).getTime();
-                var end_date = [
-                  new Date(d1).getDate(),
-                  new Date(d1).getMonth() + 1,
-                  new Date(d1).getFullYear(),
-                ].join("-");
-                leave["end_date"] = end_date;
-                leave["reason"] = data?.reason;
-                leave["status"] = data?.status;
-              });
-              leaveData.push(leave);
-              if (resss) {
+              if (resss.length) {
+                let count1 = 0;
+                resss?.map((data) => {
+                  leave["leave_id"] = data?.leave_id;
+                  leave["user_id"] = data?.user_id;
+                  var d = new Date(data?.start_date).getTime();
+                  var start_date = [
+                    new Date(d).getDate(),
+                    new Date(d).getMonth() + 1,
+                    new Date(d).getFullYear(),
+                  ].join("-");
+                  leave["start_date"] = start_date;
+                  var d1 = new Date(data?.end_date).getTime();
+                  var end_date = [
+                    new Date(d1).getDate(),
+                    new Date(d1).getMonth() + 1,
+                    new Date(d1).getFullYear(),
+                  ].join("-");
+                  leave["end_date"] = end_date;
+                  leave["reason"] = data?.reason;
+                  leave["status"] = data?.status;
+                  count1++;
+                  leaveData.push(leave);
+                });
+
+                if (resss.length === count1) {
+                  count++;
+                }
+              } else {
                 count++;
+                leaveData.push(resss);
               }
               user["id"] = test.user_id;
               user["name"] = test.name;

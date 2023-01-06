@@ -39,7 +39,7 @@ router.post(
 );
 
 router.delete(
-  "/leave",
+  "/leave/:id",
   userControllers.deleteLeave,
   (req, res, next) => {
     res.send(req.data);
