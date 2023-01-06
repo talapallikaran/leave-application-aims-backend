@@ -31,20 +31,28 @@ const listLeaveById = function (req, res) {
 };
 
 const createLeave = (req, res, err) => {
-  Leave.createleaves(req.body)
-    .then(function (result) {
-      return res.status(200).json({
-        status: "success",
-        statusCode: "200",
-        message: "success! created account for new user",
+  const { user_id, start_date, end_date, reason } = req.body;
+  if (user_id && start_date && end_date && reason) {
+    Leave.createleaves(req.body)
+      .then(function (result) {
+        return res.status(200).json({
+          status: "success",
+          statusCode: "200",
+          message: "success! created account for new user",
+        });
+      })
+      .catch(function (err) {
+        return res.status(400).json({
+          message: err,
+          statusCode: "400",
+        });
       });
-    })
-    .catch(function (err) {
-      return res.status(400).json({
-        message: err,
-        statusCode: "400",
-      });
+  } else {
+    return res.status(400).json({
+      message: "user id or start date or end date or reason is missing  ",
+      statusCode: "400",
     });
+  }
 };
 
 const deleteLeave = (request, response, error) => {

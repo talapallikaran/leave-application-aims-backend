@@ -22,14 +22,35 @@ const listUser = async function (req, res) {
             let user = {};
 
             Leave.getleaveByUserId(test.user_id).then(function (resss) {
-              leaveData.push(resss);
+              let leave = {};
+              resss?.map((data) => {
+                leave["leave_id"] = data?.leave_id;
+                leave["user_id"] = data?.user_id;
+                var d = new Date(data?.start_date).getTime();
+                var start_date = [
+                  new Date(d).getDate(),
+                  new Date(d).getMonth() + 1,
+                  new Date(d).getFullYear(),
+                ].join("-");
+                leave["start_date"] = start_date;
+                var d1 = new Date(data?.end_date).getTime();
+                var end_date = [
+                  new Date(d1).getDate(),
+                  new Date(d1).getMonth() + 1,
+                  new Date(d1).getFullYear(),
+                ].join("-");
+                leave["end_date"] = end_date;
+                leave["reason"] = data?.reason;
+                leave["status"] = data?.status;
+              });
+              leaveData.push(leave);
               if (resss) {
                 count++;
               }
               user["id"] = test.user_id;
               user["name"] = test.name;
               user["reporting_person"] = test.reporting_person;
-              user["leaves"] = resss;
+              user["leaves"] = leaveData;
               userData.push(user);
               if (count === data.length) {
                 return res.status(200).json(userData);

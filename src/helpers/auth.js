@@ -4,8 +4,6 @@ const dformat = [d.getHours(), d.getMinutes(), d.getSeconds()].join(":");
 console.log("currenttime", dformat);
 
 const AUTH = async (data) => {
-  console.log(data);
-  console.log(data.split(" ")[1]);
   authData = data.split(" ")[1];
 
   {
