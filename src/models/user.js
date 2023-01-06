@@ -38,7 +38,7 @@ const createUser = function (request, response) {
     hashPassword(password)
       .then(function (hash) {
         return pool.query(
-          "INSERT INTO users ( role_id, name, email_id, phone, dob , password ) VALUES ($1, $2 ,$3 ,$4 , $5 ,$6 )",
+          "INSERT INTO users ( role_id, name, email_id, phone, dob ,   ) VALUES ($1, $2 ,$3 ,$4 , $5 ,$6 )",
           [role_id, name, email_id, phone, dob, hash]
         );
       })
@@ -129,6 +129,11 @@ const createUserSession = function (request, response) {
 };
 
 const updateUserSession = function (data) {
+  var d = new Date();
+  const afterTime = [d.getHours() + 3, d.getMinutes(), d.getSeconds()].join(
+    ":"
+  );
+  console.log("afterTime ", afterTime);
   const { token, user_id } = data;
   return new Promise(function (resolve, reject) {
     if (!user_id) {
@@ -137,8 +142,8 @@ const updateUserSession = function (data) {
     } else {
       pool
         .query(
-          "UPDATE public.user_session SET  token=$2     WHERE user_id=$1;",
-          [user_id, token]
+          "UPDATE public.user_session SET  token=$2 , expires_at=$3    WHERE user_id=$1;",
+          [user_id, token, afterTime]
         )
         .then(function (result) {
           resolve(result.rows[0]);

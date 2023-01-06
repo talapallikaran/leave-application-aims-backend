@@ -122,6 +122,7 @@ const login = (request, response) => {
                     message: "Login Successfully!",
                     accessToken: token,
                     email: email,
+                    user_id: user_id,
                   });
                 });
               } else {
@@ -132,6 +133,7 @@ const login = (request, response) => {
                     message: "Login Successfully!",
                     accessToken: token,
                     email: email,
+                    user_id: isExists.user_id,
                   });
                 });
               }
