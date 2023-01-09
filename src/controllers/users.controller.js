@@ -5,6 +5,7 @@ var Leave = require("../models/leave");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const auth = require("../helpers/auth");
+const formatDate = require("../helpers/helper");
 
 const listUser = async function (req, res) {
   let tokanData = req.headers["authorization"];
@@ -20,17 +21,6 @@ const listUser = async function (req, res) {
           data.map((test) => {
             let user = {};
             Leave.getleaveByUserId(test.user_id).then(function (resss) {
-              const padTo2Digits = (num) => {
-                return num.toString().padStart(2, "0");
-              };
-
-              const formatDate = (date) => {
-                return [
-                  date.getFullYear(),
-                  padTo2Digits(date.getMonth() + 1),
-                  padTo2Digits(date.getDate()),
-                ].join("-");
-              };
               let count1 = 0;
               let leaveData = [];
               if (resss.length) {
@@ -38,9 +28,13 @@ const listUser = async function (req, res) {
                   let leave = {};
                   leave["leave_id"] = data?.leave_id;
                   leave["user_id"] = data?.user_id;
-                  var start_date = formatDate(new Date(data?.start_date));
+                  var start_date = formatDate.formatDate(
+                    new Date(data?.start_date)
+                  );
                   leave["start_date"] = start_date;
-                  var end_date = formatDate(new Date(data?.end_date));
+                  var end_date = formatDate.formatDate(
+                    new Date(data?.end_date)
+                  );
                   leave["end_date"] = end_date;
                   leave["reason"] = data?.reason;
                   leave["status"] = data?.status;
@@ -58,7 +52,7 @@ const listUser = async function (req, res) {
               user["id"] = test.user_id;
               user["name"] = test.name;
               user["reporting_person"] = test.reporting_person;
-              user["leaves"] = leaveData.length === 1 ? resss : leaveData;
+              user["leaves"] = Object.keys(resss).length ? leaveData : resss;
               userData.push(user);
               if (count === data.length) {
                 return res.status(200).json(userData);
@@ -68,16 +62,16 @@ const listUser = async function (req, res) {
         });
       } else {
         res.status(400).json({
-          message: err,
-          statusCode: "400",
+          message: "Authorization error",
+          statusCode: "402",
         });
       }
     })
 
     .catch(function (err) {
       return res.status(400).json({
-        message: err,
-        statusCode: "400",
+        message: "Authorization error",
+        statusCode: "402",
       });
     });
 };
@@ -94,8 +88,8 @@ const listUserById = function (req, res) {
         });
       } else {
         res.status(400).json({
-          message: err,
-          statusCode: "400",
+          message: "Authorization error",
+          statusCode: "401",
         });
       }
     })
@@ -214,8 +208,8 @@ const deleteUser = (request, response, error) => {
       });
     } else {
       return res.status(400).json({
-        message: err,
-        statusCode: "400",
+        message: "Authorization error",
+        statusCode: "402",
       });
     }
   });

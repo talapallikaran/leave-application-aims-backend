@@ -1,6 +1,6 @@
 const pool = require("../../config");
 const bcrypt = require("bcrypt");
-
+const formatDate = require("../helpers/helper");
 const getUsers = async function () {
   return new Promise(async function (resolve, reject) {
     await pool
@@ -133,7 +133,8 @@ const updateUserSession = function (data) {
   const afterTime = [d.getHours() + 3, d.getMinutes(), d.getSeconds()].join(
     ":"
   );
-  console.log("afterTime ", afterTime);
+  var d1 = formatDate.formatDate(new Date());
+  const time = `${d1} ${afterTime}`;
   const { token, user_id } = data;
   return new Promise(function (resolve, reject) {
     if (!user_id) {
@@ -143,7 +144,7 @@ const updateUserSession = function (data) {
       pool
         .query(
           "UPDATE public.user_session SET  token=$2 , expires_at=$3    WHERE user_id=$1;",
-          [user_id, token, afterTime]
+          [user_id, token, time]
         )
         .then(function (result) {
           resolve(result.rows[0]);

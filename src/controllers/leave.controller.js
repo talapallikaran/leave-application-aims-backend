@@ -32,27 +32,39 @@ const listLeaveById = function (req, res) {
 
 const createLeave = (req, res, err) => {
   const { user_id, start_date, end_date, reason } = req.body;
-  if (user_id && start_date && end_date && reason) {
-    Leave.createleaves(req.body)
-      .then(function (result) {
-        return res.status(200).json({
-          status: "success",
-          statusCode: "200",
-          message: "success! created account for new user",
-        });
-      })
-      .catch(function (err) {
-        return res.status(400).json({
-          message: err,
-          statusCode: "400",
-        });
+  let tokanData = req.headers["authorization"];
+  auth.AUTH(tokanData).then(async function (result) {
+    if (result) {
+      if (result.user_id === user_id) {
+        if (user_id && start_date && end_date && reason) {
+          Leave.createleaves(req.body)
+            .then(function (result) {
+              return res.status(200).json({
+                status: "success",
+                statusCode: "200",
+                message: "success! created account for new user",
+              });
+            })
+            .catch(function (err) {
+              return res.status(400).json({
+                message: err,
+                statusCode: "400",
+              });
+            });
+        } else {
+          return res.status(400).json({
+            message: "user id or start date or end date or reason is missing  ",
+            statusCode: "400",
+          });
+        }
+      }
+    } else {
+      return res.status(402).json({
+        message: "Authorization error",
+        statusCode: "402",
       });
-  } else {
-    return res.status(400).json({
-      message: "user id or start date or end date or reason is missing  ",
-      statusCode: "400",
-    });
-  }
+    }
+  });
 };
 
 const deleteLeave = (request, response, error) => {
@@ -97,7 +109,6 @@ const updateLeaveStatus = (req, res) => {
     .then(async function (result) {
       if (result) {
         if (result.user_id === user_id) {
-          console.log("result", result);
           Leave.UpdateleaveStatus({
             leave_id: req.body.leave_id,
             user_id: req.body.user_id,
@@ -111,15 +122,15 @@ const updateLeaveStatus = (req, res) => {
             });
           });
         } else {
-          return res.status(400).json({
-            message: err,
-            statusCode: "400",
+          return res.status(402).json({
+            message: "Authorization error",
+            statusCode: "402",
           });
         }
       } else {
-        return res.status(400).json({
-          message: err,
-          statusCode: "400",
+        return res.status(402).json({
+          message: "Authorization error",
+          statusCode: "402",
         });
       }
     })

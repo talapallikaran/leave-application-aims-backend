@@ -8,3 +8,15 @@ exports.UUID = () => {
   }
   return result;
 };
+
+const padTo2Digits = (num) => {
+  return num.toString().padStart(2, "0");
+};
+
+exports.formatDate = (date) => {
+  return [
+    date.getFullYear(),
+    padTo2Digits(date.getMonth() + 1),
+    padTo2Digits(date.getDate()),
+  ].join("-");
+};
