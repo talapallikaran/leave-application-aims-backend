@@ -20,3 +20,22 @@ exports.formatDate = (date) => {
     padTo2Digits(date.getDate()),
   ].join("-");
 };
+
+exports.dateIsValid = (dateStr) => {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  const regexDmy = /^\d{2}-\d{2}-\d{4}$/;
+  console.log(regexDmy);
+
+  if (dateStr.match(regexDmy) === null) {
+    return false;
+  }
+  const date = new Date(dateStr);
+
+  const timestamp = date.getTime();
+
+  if (typeof timestamp !== "number" || Number.isNaN(timestamp)) {
+    return false;
+  }
+
+  return date.toISOString().startsWith(dateStr);
+};

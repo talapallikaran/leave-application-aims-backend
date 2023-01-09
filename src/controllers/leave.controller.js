@@ -2,6 +2,7 @@ require("dotenv").config();
 
 var Leave = require("../models/leave");
 const auth = require("../helpers/auth");
+const dateIsValid = require("../helpers/helper");
 
 const listleave = function (req, res) {
   Leave.getleaves()
@@ -32,25 +33,36 @@ const listLeaveById = function (req, res) {
 
 const createLeave = (req, res, err) => {
   const { user_id, start_date, end_date, reason } = req.body;
+  console.log(dateIsValid.dateIsValid(start_date));
   let tokanData = req.headers["authorization"];
   auth.AUTH(tokanData).then(async function (result) {
     if (result) {
-      if (result.user_id === user_id) {
+      let test = false;
+      if (result.id === user_id || test) {
         if (user_id && start_date && end_date && reason) {
-          Leave.createleaves(req.body)
-            .then(function (result) {
-              return res.status(200).json({
-                status: "success",
-                statusCode: "200",
-                message: "success! created account for new user",
+          if (start_date <= end_date) {
+            Leave.createleaves(req.body, result.user_id)
+              .then(function (result) {
+                return res.status(200).json({
+                  status: "success",
+                  statusCode: "200",
+                  message: "success! created account for new user",
+                });
+              })
+              .catch(function (err) {
+                return res.status(400).json({
+                  message: err,
+                  statusCode: "400",
+                });
               });
-            })
-            .catch(function (err) {
-              return res.status(400).json({
-                message: err,
-                statusCode: "400",
-              });
+          } else {
+            console.log("ashgfhgfhgfiujklkl");
+            return res.status(400).json({
+              message:
+                "The end date is must be greter then or equl to start date",
+              statusCode: "400",
             });
+          }
         } else {
           return res.status(400).json({
             message: "user id or start date or end date or reason is missing  ",
@@ -91,7 +103,7 @@ const updateLeave = (req, res) => {
       return res.status(200).json({
         status: "success",
         statusCode: "200",
-        message: "success! user data updated suucessfully",
+        message: "success! leave status  updated suucessfully",
       });
     })
     .catch(function (err) {
@@ -102,18 +114,17 @@ const updateLeave = (req, res) => {
 };
 
 const updateLeaveStatus = (req, res) => {
-  const { leave_id, user_id, status, reporting_person } = req.body;
+  const { leave_id, status, reporting_person } = req.body;
   let tokanData = req.headers["authorization"];
   auth
     .AUTH(tokanData)
     .then(async function (result) {
       if (result) {
-        if (result.user_id === user_id) {
+        console.log(result.id, reporting_person);
+        if (result.id === reporting_person) {
           Leave.UpdateleaveStatus({
             leave_id: req.body.leave_id,
-            user_id: req.body.user_id,
             status: req.body.status,
-            reporting_person: req.body.reporting_person,
           }).then(function (result) {
             return res.status(200).json({
               status: "success",
@@ -122,9 +133,9 @@ const updateLeaveStatus = (req, res) => {
             });
           });
         } else {
-          return res.status(402).json({
+          return res.status(401).json({
             message: "Authorization error",
-            statusCode: "402",
+            statusCode: "401",
           });
         }
       } else {
@@ -137,6 +148,7 @@ const updateLeaveStatus = (req, res) => {
     .catch(function (err) {
       return res.status(400).json({
         message: err,
+        statusCode: "400",
       });
     });
 };

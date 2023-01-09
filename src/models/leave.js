@@ -39,14 +39,14 @@ const getleaveByUserId = async function (id) {
   });
 };
 
-const createleaves = function (request, response) {
+const createleaves = function (request, id) {
   const status = 1;
   const { user_id, start_date, end_date, reason } = request;
   return new Promise(function (resolve, reject) {
     pool
       .query(
-        "INSERT INTO leaves( user_id, start_date, end_date, reason, status)   VALUES ($1, $2, $3, $4, $5)",
-        [user_id, start_date, end_date, reason, status]
+        "INSERT INTO leaves( id, start_date, end_date, reason, status ,user_id)   VALUES ($1, $2, $3, $4, $5 ,$6)",
+        [user_id, start_date, end_date, reason, status, id]
       )
       .then(function (result) {
         resolve(result.rows[0]);

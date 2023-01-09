@@ -5,7 +5,7 @@ const getUsers = async function () {
   return new Promise(async function (resolve, reject) {
     await pool
       .query(
-        "SELECT u.*, rpm.reporting_person_id as reporting_person FROM users u LEFT JOIN reporting_person_map rpm ON rpm.user_id = u.user_id ORDER BY u.id ASC",
+        "SELECT u.*, rpm.reporting_person_id as reporting_person  ,rpm.reporting_person_uuid as reporting_person_uuid FROM users u LEFT JOIN reporting_person_map rpm ON rpm.user_id = u.user_id ORDER BY u.id ASC",
         []
       )
       .then(function (results) {
@@ -112,12 +112,12 @@ const getUserSessionByUser_id = function (id) {
 };
 
 const createUserSession = function (request, response) {
-  const { token, user_id } = request;
+  const { token, user_id, id } = request;
   return new Promise(function (resolve, reject) {
     pool
       .query(
-        "INSERT INTO public.user_session( token, user_id  )  VALUES ( $1, $2);",
-        [token, user_id]
+        "INSERT INTO public.user_session( token, user_id  , id )  VALUES ( $1, $2 ,$3);",
+        [token, user_id, id]
       )
       .then(function (result) {
         resolve(result.rows[0]);

@@ -49,9 +49,9 @@ const listUser = async function (req, res) {
                 count++;
                 leaveData.push(resss);
               }
-              user["id"] = test.user_id;
+              user["id"] = test.id;
               user["name"] = test.name;
-              user["reporting_person"] = test.reporting_person;
+              user["reporting_person"] = test.reporting_person_uuid;
               user["leaves"] = Object.keys(resss).length ? leaveData : resss;
               userData.push(user);
               if (count === data.length) {
@@ -135,19 +135,21 @@ const login = (request, response) => {
               }
             );
             const user_id = user.user_id;
-
+            const id = user.id;
             User.getUserSessionByUser_id(user_id).then(function (isExists) {
               if (!isExists) {
-                User.createUserSession({ token, user_id }).then(function () {
-                  response.status(200).json({
-                    status: "success",
-                    statusCode: "200",
-                    message: "Login Successfully!",
-                    accessToken: token,
-                    email: email,
-                    user_id: user_id,
-                  });
-                });
+                User.createUserSession({ token, user_id, id }).then(
+                  function () {
+                    response.status(200).json({
+                      status: "success",
+                      statusCode: "200",
+                      message: "Login Successfully!",
+                      accessToken: token,
+                      email: email,
+                      user_id: id,
+                    });
+                  }
+                );
               } else {
                 User.updateUserSession({ token, user_id }).then(function () {
                   response.status(200).json({
@@ -156,7 +158,7 @@ const login = (request, response) => {
                     message: "Login Successfully!",
                     accessToken: token,
                     email: email,
-                    user_id: isExists.user_id,
+                    user_id: id,
                   });
                 });
               }
