@@ -23,13 +23,12 @@ exports.formatDate = (date) => {
 
 exports.dateIsValid = (dateStr) => {
   const regex = /^\d{4}-\d{2}-\d{2}$/;
-  const regexDmy = /^\d{2}-\d{2}-\d{4}$/;
-  console.log(regexDmy);
 
-  if (dateStr.match(regexDmy) === null) {
+  let data = dateStr.split("-").reverse().join("-");
+  if (data.match(regex) === null) {
     return false;
   }
-  const date = new Date(dateStr);
+  const date = new Date(data);
 
   const timestamp = date.getTime();
 
@@ -37,5 +36,5 @@ exports.dateIsValid = (dateStr) => {
     return false;
   }
 
-  return date.toISOString().startsWith(dateStr);
+  return date.toISOString().startsWith(data);
 };

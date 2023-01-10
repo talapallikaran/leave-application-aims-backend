@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 var User = require("../models/user");
+var admin = require("../models/admin");
 var Leave = require("../models/leave");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -16,7 +17,7 @@ const listUser = async function (req, res) {
     .AUTH(tokanData)
     .then(async function (result) {
       if (result) {
-        User.getUsers().then(async function (result) {
+        admin.getUsers().then(async function (result) {
           data = result;
           data.map((test) => {
             let user = {};
@@ -51,7 +52,11 @@ const listUser = async function (req, res) {
               }
               user["id"] = test.id;
               user["name"] = test.name;
+              var dob = formatDate.formatDate(new Date(test?.dob));
+              user["dob"] = dob.split("-").reverse().join("-");
+              user["phone"] = test.phone;
               user["reporting_person"] = test.reporting_person_uuid;
+              user["reporting_person_name"] = test.reporting_person_name;
               user["leaves"] = Object.keys(resss).length ? leaveData : resss;
               userData.push(user);
               if (count === data.length) {
@@ -101,88 +106,28 @@ const listUserById = function (req, res) {
     });
 };
 
-const login = (request, response) => {
-  const { email, password } = request.body;
-  User.isUserExists(email).then((isExists) => {
-    if (!isExists) {
-      return response.status(401).json({
-        status: "failed",
-        message: "Invalid email or password!",
-        statusCode: "401",
-      });
-    }
-    User.getUser(email).then(
-      (user) => {
-        bcrypt.compare(password, user.password, (error, isValid) => {
-          if (error) {
-            throw error;
-          }
-          if (!isValid) {
-            return response.status(401).json({
-              status: "failed",
-              message: "Invalid email or password??!",
-              statusCode: "401",
-            });
-          } else {
-            const token = jwt.sign(
-              {
-                id: user.user_id,
-              },
-              process.env.API_SECRET,
-              {
-                expiresIn: 86400,
-              }
-            );
-            const user_id = user.user_id;
-            const id = user.id;
-            const role_id = user.role_id;
-            User.getUserSessionByUser_id(user_id).then(function (isExists) {
-              if (!isExists) {
-                User.createUserSession({ token, user_id, id }).then(
-                  function () {
-                    response.status(200).json({
-                      status: "success",
-                      statusCode: "200",
-                      message: "Login Successfully!",
-                      accessToken: token,
-                      email: email,
-                      user_id: id,
-                      role_id: role_id,
-                    });
-                  }
-                );
-              } else {
-                User.updateUserSession({ token, user_id }).then(function () {
-                  response.status(200).json({
-                    status: "success",
-                    statusCode: "200",
-                    message: "Login Successfully!",
-                    accessToken: token,
-                    email: email,
-                    user_id: id,
-                    role_id: role_id,
-                  });
-                });
-              }
-            });
-          }
-        });
-      },
-
-      (error) => {
-        response.status(400).json({
-          status: "failed",
-          statusCode: "400",
-          message: "Error while login.",
-        });
-      }
-    );
-  });
-};
-
 const createUser = (req, res, err) => {
   // let { id, name, email } = req.body;
   User.createUser(req.body)
+    .then(function (result) {
+      return res.status(200).json({
+        status: "success",
+        statusCode: "200",
+        message: "success! created account for new user",
+      });
+    })
+    .catch(function (err) {
+      return res.status(400).json({
+        message: err,
+        statusCode: "400",
+      });
+    });
+};
+
+const setuserroles = (req, res, err) => {
+  // let { id, name, email } = req.body;
+  admin
+    .createUser(req.body)
     .then(function (result) {
       return res.status(200).json({
         status: "success",
@@ -256,8 +201,9 @@ const updateUser = (req, res) => {
 module.exports = {
   listUser,
   listUserById,
-  login,
+
   createUser,
   deleteUser,
+  setuserroles,
   updateUser,
 };

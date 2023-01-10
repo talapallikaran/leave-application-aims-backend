@@ -1,5 +1,6 @@
 const users = require("./users");
 const leave = require("./leave");
+const admin = require("./admin");
 const express = require("express");
 const router = express.Router();
 
@@ -11,5 +12,6 @@ router.get("/", function (req, res, next) {
 
 router.use(users);
 router.use(leave);
+router.use(admin);
 
 module.exports = router;

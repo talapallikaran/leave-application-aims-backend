@@ -21,7 +21,6 @@ const AUTH = async (data) => {
               reject(err);
             }
           } else {
-            console.log("not done");
             resolve();
           }
         })
