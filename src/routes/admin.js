@@ -24,5 +24,26 @@ router.post(
     res.status(400).send({ error: error.message });
   }
 );
+router.put(
+  "/updateuserroles",
+  adminControllers.updateuserroles,
+  (req, res) => {
+    res.send(req.data);
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
+
+router.put(
+  "/updateUser",
+  adminControllers.updateUser,
+  (req, res) => {
+    res.send(req.data);
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
 
 module.exports = router;

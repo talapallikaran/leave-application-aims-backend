@@ -38,7 +38,7 @@ const createUser = function (request, response) {
     hashPassword(password)
       .then(function (hash) {
         return pool.query(
-          "INSERT INTO users ( role_id, name, email_id, phone, dob ,   ) VALUES ($1, $2 ,$3 ,$4 , $5 ,$6 )",
+          "INSERT INTO users ( role_id, name, email_id, phone, dob ,password   ) VALUES ($1, $2 ,$3 ,$4 , $5 ,$6 )",
           [role_id, name, email_id, phone, dob, hash]
         );
       })
@@ -73,6 +73,18 @@ const getUserById = function (id) {
   return new Promise(function (resolve, reject) {
     pool
       .query("SELECT * FROM users where user_id = $1", [id])
+      .then(function (results) {
+        resolve(results.rows[0]);
+      })
+      .catch(function (err) {
+        reject(err);
+      });
+  });
+};
+const getUserByUUId = function (id) {
+  return new Promise(function (resolve, reject) {
+    pool
+      .query("SELECT * FROM users where id = $1", [id])
       .then(function (results) {
         resolve(results.rows[0]);
       })
@@ -221,4 +233,5 @@ module.exports = {
   createUserSession,
   getUserSessionByUser_id,
   updateUserSession,
+  getUserByUUId,
 };

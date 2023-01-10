@@ -57,6 +57,7 @@ const listUser = async function (req, res) {
               user["phone"] = test.phone;
               user["reporting_person"] = test.reporting_person_uuid;
               user["reporting_person_name"] = test.reporting_person_name;
+              user["email"] = test.email_id;
               user["leaves"] = Object.keys(resss).length ? leaveData : resss;
               userData.push(user);
               if (count === data.length) {
@@ -106,34 +107,40 @@ const listUserById = function (req, res) {
     });
 };
 
-const createUser = (req, res, err) => {
-  // let { id, name, email } = req.body;
-  User.createUser(req.body)
-    .then(function (result) {
-      return res.status(200).json({
-        status: "success",
-        statusCode: "200",
-        message: "success! created account for new user",
-      });
-    })
-    .catch(function (err) {
-      return res.status(400).json({
-        message: err,
-        statusCode: "400",
-      });
-    });
-};
-
 const setuserroles = (req, res, err) => {
-  // let { id, name, email } = req.body;
-  admin
-    .createUser(req.body)
-    .then(function (result) {
-      return res.status(200).json({
-        status: "success",
-        statusCode: "200",
-        message: "success! created account for new user",
-      });
+  let { user_uuid, reporting_person_uuid } = req.body;
+  User.getUserByUUId(user_uuid)
+    .then(async function (resss) {
+      User.getUserByUUId(reporting_person_uuid)
+        .then(async function (response) {
+          admin
+            .setUserRoles({
+              user_id: resss.user_id,
+              reporting_person_id: response.user_id,
+              reporting_person_uuid: reporting_person_uuid,
+              reporting_person_name: response.name,
+              user_uuid: user_uuid,
+            })
+            .then(async function (result) {
+              return res.status(200).json({
+                status: "success",
+                statusCode: "200",
+                message: "success! created account for new user",
+              });
+            })
+            .catch(function (err) {
+              return res.status(400).json({
+                message: err,
+                statusCode: "400",
+              });
+            });
+        })
+        .catch(function (err) {
+          return res.status(400).json({
+            message: err,
+            statusCode: "400",
+          });
+        });
     })
     .catch(function (err) {
       return res.status(400).json({
@@ -141,48 +148,79 @@ const setuserroles = (req, res, err) => {
         statusCode: "400",
       });
     });
-};
-
-const deleteUser = (request, response, error) => {
-  const { id } = request.params;
-  let tokanData = req.headers["authorization"];
-  auth.AUTH(tokanData).then(async function (result) {
-    if (result) {
-      User.DeleteUser(id).then(function (result) {
-        return response.status(200).json({
-          status: "success",
-          statusCode: "200",
-          message: "success! user data deleted suucessfully",
-        });
-      });
-    } else {
-      return res.status(400).json({
-        message: "Authorization error",
-        statusCode: "402",
-      });
-    }
-  });
 };
 
 const updateUser = (req, res) => {
+  let { user_uuid, reporting_person_uuid } = req.body;
   let tokanData = req.headers["authorization"];
   auth
     .AUTH(tokanData)
     .then(async function (result) {
       if (result) {
-        User.Updateuser({
-          user_id: req.params,
-          role_id: req.body.role_id,
-          name: req.body.name,
-          email_id: req.body.email_id,
-          phone: req.body.phone,
-          id: req.body.id,
-          dob: req.body.dob,
-        }).then(function (result) {
-          return res.status(200).json({
-            status: "success",
-            statusCode: "200",
-            message: "success! user data updated suucessfully",
+        User.getUserByUUId(user_uuid).then(async function (resss) {
+          User.getUserByUUId(reporting_person_uuid).then(async function (
+            response
+          ) {
+            admin
+              .Updateuser({
+                user_id: resss.user_id,
+                reporting_person_id: response.user_id,
+                reporting_person_uuid: reporting_person_uuid,
+                reporting_person_name: response.name,
+                user_uuid: user_uuid,
+                role_id: req.body.role_id,
+                name: req.body.name,
+                email_id: req.body.email_id,
+                phone: req.body.phone,
+                id: req.body.id,
+                dob: req.body.dob,
+              })
+              .then(function (result) {
+                return res.status(200).json({
+                  status: "success",
+                  statusCode: "200",
+                  message: "success! user data updated suucessfully",
+                });
+              });
+          });
+        });
+      } else {
+        return res.status(400).json({
+          message: err,
+        });
+      }
+    })
+    .catch(function (err) {
+      return res.status(400).json({
+        message: err,
+      });
+    });
+};
+const updateuserroles = (req, res) => {
+  let { user_uuid, reporting_person_uuid } = req.body;
+  let tokanData = req.headers["authorization"];
+  auth
+    .AUTH(tokanData)
+    .then(async function (result) {
+      if (result) {
+        User.getUserByUUId(user_uuid).then(async function (resss) {
+          User.getUserByUUId(reporting_person_uuid).then(async function (
+            response
+          ) {
+            admin
+              .updateUserRoles({
+                reporting_person_id: response.user_id,
+                reporting_person_uuid: reporting_person_uuid,
+                reporting_person_name: response.name,
+                user_uuid: user_uuid,
+              })
+              .then(function (result) {
+                return res.status(200).json({
+                  status: "success",
+                  statusCode: "200",
+                  message: "success! user data updated suucessfully",
+                });
+              });
           });
         });
       } else {
@@ -201,7 +239,7 @@ const updateUser = (req, res) => {
 module.exports = {
   listUser,
   listUserById,
-
+  updateuserroles,
   createUser,
   deleteUser,
   setuserroles,
