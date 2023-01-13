@@ -36,19 +36,6 @@ router.post(
   }
 );
 
-router.post(
-  "/users",
-  userControllers.createUser,
-  async (req, res, next) => {
-    res.send(req.data);
-  },
-  (error, req, res, next) => {
-    res
-      .status(400)
-      .send({ message: error.message, status: "failed", statusCode: "400" });
-  }
-);
-
 router.delete(
   "/users/:id",
   userControllers.deleteUser,

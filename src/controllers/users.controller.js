@@ -180,24 +180,6 @@ const login = (request, response) => {
   });
 };
 
-const createUser = (req, res, err) => {
-  // let { id, name, email } = req.body;
-  User.createUser(req.body)
-    .then(function (result) {
-      return res.status(200).json({
-        status: "success",
-        statusCode: "200",
-        message: "success! created account for new user",
-      });
-    })
-    .catch(function (err) {
-      return res.status(400).json({
-        message: err,
-        statusCode: "400",
-      });
-    });
-};
-
 const deleteUser = (request, response, error) => {
   const { id } = request.params;
   let tokanData = req.headers["authorization"];
@@ -257,7 +239,6 @@ module.exports = {
   listUser,
   listUserById,
   login,
-  createUser,
   deleteUser,
   updateUser,
 };

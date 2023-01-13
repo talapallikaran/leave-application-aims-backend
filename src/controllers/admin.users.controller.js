@@ -82,137 +82,27 @@ const listUser = async function (req, res) {
     });
 };
 
-const listUserById = function (req, res) {
-  const { id } = req.params;
-  let tokanData = req.headers["authorization"];
-  auth
-    .AUTH(tokanData)
-    .then(async function (result) {
-      if (result) {
-        User.getUserId(id).then(function (result) {
-          return res.status(200).json(result);
-        });
-      } else {
-        res.status(400).json({
-          message: "Authorization error",
-          statusCode: "401",
-        });
-      }
-    })
-    .catch(function (err) {
-      return res.status(400).json({
-        message: err,
-        statusCode: "400",
-      });
-    });
-};
-
-const setuserroles = (req, res, err) => {
-  let { user_uuid, reporting_person_uuid } = req.body;
-  User.getUserByUUId(user_uuid)
-    .then(async function (resss) {
-      User.getUserByUUId(reporting_person_uuid)
-        .then(async function (response) {
-          admin
-            .setUserRoles({
-              user_id: resss.user_id,
-              reporting_person_id: response.user_id,
-              reporting_person_uuid: reporting_person_uuid,
-              reporting_person_name: response.name,
-              user_uuid: user_uuid,
-            })
-            .then(async function (result) {
-              return res.status(200).json({
-                status: "success",
-                statusCode: "200",
-                message: "success! created account for new user",
-              });
-            })
-            .catch(function (err) {
-              return res.status(400).json({
-                message: err,
-                statusCode: "400",
-              });
-            });
-        })
-        .catch(function (err) {
-          return res.status(400).json({
-            message: err,
-            statusCode: "400",
-          });
-        });
-    })
-    .catch(function (err) {
-      return res.status(400).json({
-        message: err,
-        statusCode: "400",
-      });
-    });
-};
-
-const updateUser = (req, res) => {
-  let { user_uuid, reporting_person_uuid } = req.body;
-  let tokanData = req.headers["authorization"];
-  auth
-    .AUTH(tokanData)
-    .then(async function (result) {
-      if (result) {
-        User.getUserByUUId(user_uuid).then(async function (resss) {
-          User.getUserByUUId(reporting_person_uuid).then(async function (
-            response
-          ) {
-            admin
-              .Updateuser({
-                user_id: resss.user_id,
-                reporting_person_id: response.user_id,
-                reporting_person_uuid: reporting_person_uuid,
-                reporting_person_name: response.name,
-                user_uuid: user_uuid,
-                role_id: req.body.role_id,
-                name: req.body.name,
-                email_id: req.body.email_id,
-                phone: req.body.phone,
-                id: req.body.id,
-                dob: req.body.dob,
-              })
-              .then(function (result) {
-                return res.status(200).json({
-                  status: "success",
-                  statusCode: "200",
-                  message: "success! user data updated suucessfully",
-                });
-              });
-          });
-        });
-      } else {
-        return res.status(400).json({
-          message: err,
-        });
-      }
-    })
-    .catch(function (err) {
-      return res.status(400).json({
-        message: err,
-      });
-    });
-};
 const updateuserroles = (req, res) => {
-  let { user_uuid, reporting_person_uuid } = req.body;
+  let { id, name, email, dob, phone, reporting_person } = req.body;
+
   let tokanData = req.headers["authorization"];
+
   auth
+
     .AUTH(tokanData)
+
     .then(async function (result) {
       if (result) {
-        User.getUserByUUId(user_uuid).then(async function (resss) {
-          User.getUserByUUId(reporting_person_uuid).then(async function (
-            response
-          ) {
+        User.getUserByUUId(id).then(async function (resss) {
+          User.getUserByUUId(reporting_person).then(async function (response) {
             admin
               .updateUserRoles({
                 reporting_person_id: response.user_id,
-                reporting_person_uuid: reporting_person_uuid,
-                reporting_person_name: response.name,
-                user_uuid: user_uuid,
+                user_id: resss.user_id,
+                name: name,
+                email_id: email,
+                dob: dob,
+                phone: phone,
               })
               .then(function (result) {
                 return res.status(200).json({
@@ -234,14 +124,58 @@ const updateuserroles = (req, res) => {
         message: err,
       });
     });
+};
+
+const createUser = (req, res, err) => {
+  let { reporting_person_id } = req.body;
+  let reporting_id;
+
+  if (reporting_person_id) {
+    User.getUserByUUId(reporting_person_id)
+      .then(function (response) {
+        reporting_id = response.user_id;
+      })
+      .then(function () {
+        admin
+          .createUser(req.body, reporting_id)
+          .then(function (result) {
+            return res.status(200).json({
+              status: "success",
+              statusCode: "200",
+              message: "success! created account for new user",
+            });
+          })
+          .catch(function (err) {
+            return res.status(400).json({
+              message: err,
+              statusCode: "400",
+            });
+          });
+      })
+      .catch(function (error) {
+        return error;
+      });
+  } else {
+    admin
+      .createUser(req.body, reporting_id)
+      .then(function (result) {
+        return res.status(200).json({
+          status: "success",
+          statusCode: "200",
+          message: "success! created account for new user",
+        });
+      })
+      .catch(function (err) {
+        return res.status(400).json({
+          message: err,
+          statusCode: "400",
+        });
+      });
+  }
 };
 
 module.exports = {
   listUser,
-  listUserById,
   updateuserroles,
   createUser,
-  deleteUser,
-  setuserroles,
-  updateUser,
 };

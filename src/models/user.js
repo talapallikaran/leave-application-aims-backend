@@ -32,25 +32,6 @@ async function isUserExists(email) {
   });
 }
 
-const createUser = function (request, response) {
-  const { role_id, name, email_id, phone, dob, password } = request;
-  return new Promise(function (resolve, reject) {
-    hashPassword(password)
-      .then(function (hash) {
-        return pool.query(
-          "INSERT INTO users ( role_id, name, email_id, phone, dob ,password   ) VALUES ($1, $2 ,$3 ,$4 , $5 ,$6 )",
-          [role_id, name, email_id, phone, dob, hash]
-        );
-      })
-      .then(function (result) {
-        resolve(result.rows[0]);
-      })
-      .catch(function (err) {
-        reject(err);
-      });
-  });
-};
-
 const DeleteUser = function (request, response) {
   return new Promise(function (resolve, reject) {
     const id = parseInt(request);
@@ -203,29 +184,10 @@ const getUserId = function (id) {
   });
 };
 
-function hashPassword(password) {
-  return new Promise(function (resolve, reject) {
-    bcrypt.genSalt(10, function (err, salt) {
-      if (err) {
-        reject(err);
-      } else {
-        bcrypt.hash(password, salt, function (err, hash) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(hash);
-          }
-        });
-      }
-    });
-  });
-}
-
 module.exports = {
   getUser,
   getUsers,
   getUserById,
-  createUser,
   Updateuser,
   DeleteUser,
   getUserId,

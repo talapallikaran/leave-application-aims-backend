@@ -15,29 +15,21 @@ router.get(
 );
 
 router.post(
-  "/setuserroles",
-  adminControllers.setuserroles,
-  (req, res) => {
+  "/users",
+  adminControllers.createUser,
+  async (req, res, next) => {
     res.send(req.data);
   },
   (error, req, res, next) => {
-    res.status(400).send({ error: error.message });
-  }
-);
-router.put(
-  "/updateuserroles",
-  adminControllers.updateuserroles,
-  (req, res) => {
-    res.send(req.data);
-  },
-  (error, req, res, next) => {
-    res.status(400).send({ error: error.message });
+    res
+      .status(400)
+      .send({ message: error.message, status: "failed", statusCode: "400" });
   }
 );
 
 router.put(
-  "/updateUser",
-  adminControllers.updateUser,
+  "/updateuserroles",
+  adminControllers.updateuserroles,
   (req, res) => {
     res.send(req.data);
   },
