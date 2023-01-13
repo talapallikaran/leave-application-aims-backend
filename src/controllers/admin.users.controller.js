@@ -18,7 +18,7 @@ const listUser = async function (req, res) {
     .then(async function (result) {
       if (result) {
         admin.getUsers().then(async function (result) {
-          data = result;
+          data = result?.filter((test) => test.role_id !== 1);
           data.map((test) => {
             let user = {};
             Leave.getleaveByUserId(test.user_id).then(function (resss) {

@@ -5,7 +5,7 @@ const getUsers = async function () {
   return new Promise(async function (resolve, reject) {
     await pool
       .query(
-        "SELECT u.*, rpm.reporting_person_id as reporting_person  ,rpm.reporting_person_uuid as reporting_person_uuid FROM users u LEFT JOIN reporting_person_map rpm ON rpm.user_id = u.user_id ORDER BY u.id ASC",
+        "SELECT u.*, rpm.reporting_person_id as reporting_person   ,s.id as reporting_person_uuid FROM users u LEFT JOIN reporting_person_map rpm ON rpm.user_id = u.user_id LEFT JOIN  users  s ON rpm.reporting_person_id  = s.user_id ORDER BY u.id ASC",
         []
       )
       .then(function (results) {
@@ -84,7 +84,6 @@ async function getUser(email, uuid) {
         if (error) {
           throw error;
         }
-
         return resolve(results.rows[0]);
       }
     );
@@ -184,6 +183,48 @@ const getUserId = function (id) {
   });
 };
 
+const updatepassword = (data) => {
+  const { email_id, password } = data;
+  return new Promise(function (resolve, reject) {
+    if (!email_id) {
+      console.log("error: id missing");
+      reject("error: id missing");
+    } else {
+      hashPassword(password)
+        .then(function (hash) {
+          return pool.query(
+            "UPDATE users SET   password=$2   WHERE email_id= $1",
+            [email_id, hash]
+          );
+        })
+        .then(function (result) {
+          resolve(result.rows[0]);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    }
+  });
+};
+
+function hashPassword(password) {
+  return new Promise(function (resolve, reject) {
+    bcrypt.genSalt(10, function (err, salt) {
+      if (err) {
+        reject(err);
+      } else {
+        bcrypt.hash(password, salt, function (err, hash) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(hash);
+          }
+        });
+      }
+    });
+  });
+}
+
 module.exports = {
   getUser,
   getUsers,
@@ -196,4 +237,5 @@ module.exports = {
   getUserSessionByUser_id,
   updateUserSession,
   getUserByUUId,
+  updatepassword,
 };

@@ -58,4 +58,15 @@ router.put(
   }
 );
 
+router.put(
+  "/reset/Password",
+  userControllers.updatePassword,
+  (req, res, next) => {
+    res.send(req.data);
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
+
 module.exports = router;
