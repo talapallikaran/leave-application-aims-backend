@@ -37,7 +37,6 @@ const updateUserRoles = function (request) {
         .then(function (result) {
           if (result.rows[0].count > 0) {
             pool
-
               .query(
                 "UPDATE public.reporting_person_map SET reporting_person_id=$2 WHERE  user_id=$1",
 
@@ -94,9 +93,9 @@ const updateUserRoles = function (request) {
 };
 
 const createUser = function (request, reporting_id) {
-  const { name, email, phone, dob, password, reporting_person_id } = request;
+  const { name, email, phone, dob, password, reporting_person } = request;
   const role_id = 2;
-  if (!reporting_person_id) {
+  if (!reporting_person) {
     return new Promise(function (resolve, reject) {
       hashPassword(password)
         .then(function (hash) {

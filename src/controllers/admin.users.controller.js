@@ -127,11 +127,11 @@ const updateuserroles = (req, res) => {
 };
 
 const createUser = (req, res, err) => {
-  let { reporting_person_id } = req.body;
+  let { reporting_person } = req.body;
   let reporting_id;
 
-  if (reporting_person_id) {
-    User.getUserByUUId(reporting_person_id)
+  if (reporting_person) {
+    User.getUserByUUId(reporting_person)
       .then(function (response) {
         reporting_id = response.user_id;
       })
