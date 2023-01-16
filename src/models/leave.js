@@ -1,6 +1,6 @@
 const pool = require("../../config");
 
-const getleaves = function () {
+function getleaves() {
   return new Promise(function (resolve, reject) {
     pool
       .query("SELECT * FROM leaves ORDER BY leave_id ASC ", [])
@@ -11,7 +11,7 @@ const getleaves = function () {
         reject(err);
       });
   });
-};
+}
 
 const getleaveByLeaveId = async function (id) {
   return await new Promise(async function (resolve, reject) {
@@ -19,19 +19,6 @@ const getleaveByLeaveId = async function (id) {
       .query("SELECT * FROM leaves where leave_id = $1", [id])
       .then(async function (results) {
         resolve(results.rows[0]);
-      })
-      .catch(function (err) {
-        reject(err);
-      });
-  });
-};
-
-const getleaveByUserId = async function (id) {
-  return new Promise(function (resolve, reject) {
-    pool
-      .query("SELECT * FROM leaves where user_id = $1", [id])
-      .then(async function (results) {
-        resolve(results.rows);
       })
       .catch(function (err) {
         reject(err);
@@ -125,6 +112,5 @@ module.exports = {
   Deleteleave,
   Updateleave,
   getleaveByLeaveId,
-  getleaveByUserId,
   UpdateleaveStatus,
 };

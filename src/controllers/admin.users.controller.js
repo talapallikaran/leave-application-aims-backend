@@ -1,27 +1,27 @@
 require("dotenv").config();
 
-var User = require("../models/user");
-var admin = require("../models/admin");
-var Leave = require("../models/leave");
+var User = require("../models/index");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const auth = require("../helpers/auth");
 const formatDate = require("../helpers/helper");
+const formValidation = require("../helpers/helper");
 
 const listUser = async function (req, res) {
   let tokanData = req.headers["authorization"];
   let count = 0;
   let data = [];
   let userData = [];
+
   auth
     .AUTH(tokanData)
     .then(async function (result) {
       if (result) {
-        admin.getUsers().then(async function (result) {
+        User.getUsers().then(async function (result) {
           data = result?.filter((test) => test.role_id !== 1);
           data.map((test) => {
             let user = {};
-            Leave.getleaveByUserId(test.user_id).then(function (resss) {
+            User.getleaveByUserId(test.user_id).then(function (resss) {
               let count1 = 0;
               let leaveData = [];
               if (resss.length) {
@@ -95,22 +95,20 @@ const updateuserroles = (req, res) => {
       if (result) {
         User.getUserByUUId(id).then(async function (resss) {
           User.getUserByUUId(reporting_person).then(async function (response) {
-            admin
-              .updateUserRoles({
-                reporting_person_id: response.user_id,
-                user_id: resss.user_id,
-                name: name,
-                email_id: email,
-                dob: dob,
-                phone: phone,
-              })
-              .then(function (result) {
-                return res.status(200).json({
-                  status: "success",
-                  statusCode: "200",
-                  message: "success! user data updated suucessfully",
-                });
+            User.updateUserRoles({
+              reporting_person_id: response.user_id,
+              user_id: resss.user_id,
+              name: name,
+              email_id: email,
+              dob: dob,
+              phone: phone,
+            }).then(function (result) {
+              return res.status(200).json({
+                status: "success",
+                statusCode: "200",
+                message: "success! user data updated suucessfully",
               });
+            });
           });
         });
       } else {
@@ -129,48 +127,54 @@ const updateuserroles = (req, res) => {
 const createUser = (req, res, err) => {
   let { reporting_person } = req.body;
   let reporting_id;
-
-  if (reporting_person) {
-    User.getUserByUUId(reporting_person)
-      .then(function (response) {
-        reporting_id = response.user_id;
-      })
-      .then(function () {
-        admin
-          .createUser(req.body, reporting_id)
-          .then(function (result) {
-            return res.status(200).json({
-              status: "success",
-              statusCode: "200",
-              message: "success! created account for new user",
+  let validation = formValidation.formValidation(req.body);
+  if (!Object.keys(validation).length) {
+    if (reporting_person) {
+      User.getUserByUUId(reporting_person)
+        .then(function (response) {
+          reporting_id = response.user_id;
+        })
+        .then(function () {
+          User.createUser(req.body, reporting_id)
+            .then(function (result) {
+              return res.status(200).json({
+                status: "success",
+                statusCode: "200",
+                message: "success! created account for new user",
+              });
+            })
+            .catch(function (err) {
+              return res.status(400).json({
+                message: err,
+                statusCode: "400",
+              });
             });
-          })
-          .catch(function (err) {
-            return res.status(400).json({
-              message: err,
-              statusCode: "400",
-            });
+        })
+        .catch(function (error) {
+          return error;
+        });
+    } else {
+      admin
+        .createUser(req.body, reporting_id)
+        .then(function (result) {
+          return res.status(200).json({
+            status: "success",
+            statusCode: "200",
+            message: "success! created account for new user",
           });
-      })
-      .catch(function (error) {
-        return error;
-      });
+        })
+        .catch(function (err) {
+          return res.status(400).json({
+            message: err,
+            statusCode: "400",
+          });
+        });
+    }
   } else {
-    admin
-      .createUser(req.body, reporting_id)
-      .then(function (result) {
-        return res.status(200).json({
-          status: "success",
-          statusCode: "200",
-          message: "success! created account for new user",
-        });
-      })
-      .catch(function (err) {
-        return res.status(400).json({
-          message: err,
-          statusCode: "400",
-        });
-      });
+    return res.status(400).json({
+      message: validation,
+      statusCode: "400",
+    });
   }
 };
 

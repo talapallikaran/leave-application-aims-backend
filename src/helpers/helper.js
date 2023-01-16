@@ -38,3 +38,31 @@ exports.dateIsValid = (dateStr) => {
 
   return date.toISOString().startsWith(data);
 };
+
+exports.formValidation = (data) => {
+  let error = {};
+  let { name, email, phone, dob, password } = data;
+  if (!phone) {
+    error = "phone number is missing ";
+  } else if (
+    !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(parseInt(phone))
+  ) {
+    error = "phone number is invalid";
+  } else if (!name) {
+    error = "name is missing ";
+  } else if (!email) {
+    error = "Email id is missing";
+  } else if (!/\S+@\S+\.\S+/.test(email)) {
+    error = "Email address is invalid";
+  } else if (!password) {
+    error = "Password is missing";
+  } else if (password?.length < 6) {
+    error = "Password must be 6 or more characters";
+  } else if (!dob) {
+    error = "birthday is missing";
+  } else if (new Date(dob)) {
+    error = "birthday is invalide";
+  }
+  console.log(error);
+  return error;
+};

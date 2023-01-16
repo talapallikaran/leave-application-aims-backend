@@ -1,4 +1,5 @@
 const pool = require("../../config");
+const router = express.Router();
 const bcrypt = require("bcrypt");
 const formatDate = require("../helpers/helper");
 const getUsers = async function () {
@@ -62,19 +63,6 @@ const getUserById = function (id) {
       });
   });
 };
-const getUserByUUId = function (id) {
-  return new Promise(function (resolve, reject) {
-    pool
-      .query("SELECT * FROM users where id = $1", [id])
-      .then(function (results) {
-        resolve(results.rows[0]);
-      })
-      .catch(function (err) {
-        reject(err);
-      });
-  });
-};
-
 async function getUser(email, uuid) {
   return new Promise((resolve) => {
     pool.query(
@@ -236,6 +224,5 @@ module.exports = {
   createUserSession,
   getUserSessionByUser_id,
   updateUserSession,
-  getUserByUUId,
   updatepassword,
 };

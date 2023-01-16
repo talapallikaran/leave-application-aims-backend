@@ -12,7 +12,7 @@ const AUTH = async (data) => {
   {
     return new Promise(function (resolve, reject) {
       pool
-        .query("SELECT * FROM  user_session   where token = $1", [authData])
+        .query("SELECT * FROM user_session where token = $1", [authData])
         .then(function (results) {
           if (results.rows.length) {
             if (Date.parse(time) < Date.parse(results?.rows[0]?.expires_at)) {
