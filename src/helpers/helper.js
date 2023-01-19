@@ -60,7 +60,7 @@ exports.formValidation = (data) => {
     error = "Password must be 6 or more characters";
   } else if (!dob) {
     error = "birthday is missing";
-  } else if (new Date(dob)) {
+  } else if (!new Date(dob)) {
     error = "birthday is invalide";
   }
   console.log(error);

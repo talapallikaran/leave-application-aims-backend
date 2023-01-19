@@ -2,7 +2,6 @@ require("dotenv").config();
 
 var User = require("../models/user");
 var Leave = require("../models/leave");
-var index = require("../models/index");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const auth = require("../helpers/auth");
@@ -21,7 +20,7 @@ const listUser = async function (req, res) {
           data = result?.filter((test) => test.role_id !== 1);
           data.map((test) => {
             let user = {};
-            index.getleaveByUserId(test.user_id).then(function (resss) {
+            Leave.getleaveByUserId(test.user_id).then(function (resss) {
               let count1 = 0;
               let leaveData = [];
               if (resss.length) {

@@ -26,6 +26,19 @@ const getleaveByLeaveId = async function (id) {
   });
 };
 
+async function getleaveByUserId(id) {
+  return new Promise(function (resolve, reject) {
+    pool
+      .query("SELECT * FROM leaves where user_id = $1", [id])
+      .then(async function (results) {
+        resolve(results.rows);
+      })
+      .catch(function (err) {
+        reject(err);
+      });
+  });
+}
+
 const createleaves = function (request, id) {
   const status = 1;
   const { user_id, start_date, end_date, reason } = request;
@@ -113,4 +126,5 @@ module.exports = {
   Updateleave,
   getleaveByLeaveId,
   UpdateleaveStatus,
+  getleaveByUserId,
 };

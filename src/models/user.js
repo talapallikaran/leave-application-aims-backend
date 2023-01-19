@@ -1,5 +1,4 @@
 const pool = require("../../config");
-const router = express.Router();
 const bcrypt = require("bcrypt");
 const formatDate = require("../helpers/helper");
 const getUsers = async function () {
