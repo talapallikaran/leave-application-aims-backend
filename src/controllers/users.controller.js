@@ -237,45 +237,53 @@ const updateUser = (req, res) => {
 
 const updatePassword = (req, res) => {
   let { email, oldPassword, newPassword } = req.body;
-  User.getUser(email)
-    .then((user) => {
-      bcrypt.compare(oldPassword, user.password, (error, isValid) => {
-        if (error) {
-          throw error;
-        }
-        if (!isValid) {
-          return res.status(401).json({
-            status: "failed",
-            message: "Invalid email or password??!",
-            statusCode: "401",
-          });
-        } else {
-          User.updatepassword({
-            email_id: email,
-            password: newPassword,
-          })
-            .then(function (result) {
-              return res.status(200).json({
-                status: "success",
-                statusCode: "200",
-                message: "success! user data updated suucessfully",
-              });
-            })
-            .catch(function (err) {
-              return res.status(400).json({
-                message: err,
-              });
+  if (oldPassword !== newPassword) {
+    User.getUser(email)
+      .then((user) => {
+        bcrypt.compare(oldPassword, user.password, (error, isValid) => {
+          if (error) {
+            throw error;
+          }
+          if (!isValid) {
+            return res.status(401).json({
+              status: "failed",
+              message: "Invalid email or password??!",
+              statusCode: "401",
             });
-        }
+          } else {
+            User.updatepassword({
+              email_id: email,
+              password: newPassword,
+            })
+              .then(function (result) {
+                return res.status(200).json({
+                  status: "success",
+                  statusCode: "200",
+                  message: "success! user data updated suucessfully",
+                });
+              })
+              .catch(function (err) {
+                return res.status(400).json({
+                  message: err,
+                });
+              });
+          }
+        });
+      })
+      .catch(function (err) {
+        return res.status(400).json({
+          status: "failed",
+          message: "Invalid email ",
+          statusCode: "401",
+        });
       });
-    })
-    .catch(function (err) {
-      return res.status(400).json({
-        status: "failed",
-        message: "Invalid email ",
-        statusCode: "401",
-      });
+  } else {
+    return res.status(400).json({
+      status: "failed",
+      message: "New password not be old password",
+      statusCode: "401",
     });
+  }
 };
 
 module.exports = {

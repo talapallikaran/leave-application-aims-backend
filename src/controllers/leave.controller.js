@@ -52,7 +52,7 @@ const createLeave = (req, res, err) => {
                   return res.status(200).json({
                     status: "success",
                     statusCode: "200",
-                    message: "success! created account for new user",
+                    message: "success! Leave applyed ",
                   });
                 })
                 .catch(function (err) {
@@ -101,7 +101,7 @@ const deleteLeave = (request, response, error) => {
   auth.AUTH(tokanData).then(async function (result) {
     if (result) {
       Leave.getleaveByUserId(result.user_id).then(function (resu) {
-        if (resu.leave_id === id) {
+        if (resu.find((data) => data.leave_id == id)) {
           Leave.Deleteleave(id).then(function (result) {
             return response.status(200).json({
               status: "success",
@@ -112,7 +112,7 @@ const deleteLeave = (request, response, error) => {
         } else {
           return response.status(403).json({
             message: "Authorization error",
-            statusCode: "403",
+            statusCode: "402",
           });
         }
       });

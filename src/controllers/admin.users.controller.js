@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 var admin = require("../models/admin");
-
+var Leave = require("../models/leave");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const auth = require("../helpers/auth");
@@ -22,7 +22,7 @@ const listUser = async function (req, res) {
           data = result?.filter((test) => test.role_id !== 1);
           data.map((test) => {
             let user = {};
-            admin.getleaveByUserId(test.user_id).then(function (resss) {
+            Leave.getleaveByUserId(test.user_id).then(function (resss) {
               let count1 = 0;
               let leaveData = [];
               if (resss.length) {
@@ -85,41 +85,88 @@ const listUser = async function (req, res) {
 
 const updateuserroles = (req, res) => {
   let { id, name, email, dob, phone, reporting_person } = req.body;
-
+  let validation = formValidation.formValidation(req.body, (data = true));
   let tokanData = req.headers["authorization"];
   auth
     .AUTH(tokanData)
     .then(async function (result) {
       if (result) {
-        admin.getUserByUUId(id).then(async function (resss) {
-          admin.getUserByUUId(reporting_person).then(async function (response) {
+        if (!Object.keys(validation).length) {
+          if (reporting_person) {
             admin
-              .updateUserRoles({
-                reporting_person_id: response.user_id,
-                user_id: resss.user_id,
-                name: name,
-                email_id: email,
-                dob: dob,
-                phone: phone,
+              .getUserByUUId(id)
+              .then(async function (resss) {
+                admin
+                  .getUserByUUId(reporting_person)
+                  .then(async function (response) {
+                    admin
+                      .updateUserRoles({
+                        reporting_person_id: response.user_id,
+                        user_id: resss.user_id,
+                        name: name,
+                        email_id: email,
+                        dob: dob,
+                        phone: phone,
+                      })
+                      .then(function (result) {
+                        return res.status(200).json({
+                          status: "success",
+                          statusCode: "200",
+                          message: "success! user data updated suucessfully",
+                        });
+                      });
+                  });
               })
-              .then(function (result) {
-                return res.status(200).json({
-                  status: "success",
-                  statusCode: "200",
-                  message: "success! user data updated suucessfully",
+              .catch(function (err) {
+                return res.status(400).json({
+                  message: err,
+                  statusCode: "400",
                 });
               });
+          } else {
+            admin
+              .getUserByUUId(id)
+              .then(async function (resss) {
+                admin
+                  .updateUserRoles({
+                    user_id: resss.user_id,
+                    name: name,
+                    email_id: email,
+                    dob: dob,
+                    phone: phone,
+                  })
+                  .then(function (result) {
+                    return res.status(200).json({
+                      status: "success",
+                      statusCode: "200",
+                      message: "success! user data updated suucessfully",
+                    });
+                  });
+              })
+              .catch(function (err) {
+                return res.status(400).json({
+                  message: err,
+                  statusCode: "400",
+                });
+              });
+          }
+        } else {
+          return res.status(400).json({
+            message: validation,
+            statusCode: "400",
           });
-        });
+        }
       } else {
-        return res.status(400).json({
-          message: err,
+        return res.status(403).json({
+          message: "Authorization error",
+          statusCode: "402",
         });
       }
     })
     .catch(function (err) {
-      return res.status(400).json({
-        message: err,
+      return res.status(403).json({
+        message: "Authorization error",
+        statusCode: "402",
       });
     });
 };
